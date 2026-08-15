@@ -1,0 +1,167 @@
+/*
+ * Tokens de diseno.
+ *
+ * Fuente unica de paleta, tipografia, escalas y modo oscuro. Ningun componente
+ * define colores literales: siempre via var(--...).
+ */
+
+:root {
+  /* --- Tipografia -------------------------------------------------------- */
+  /* Fuentes self-hosted o del sistema. NUNCA un CDN: la CSP prohibe cualquier
+     host externo (frontend-seguridad.md §3.3). */
+  --fuente-titulos: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --fuente-texto: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --fuente-mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+
+  --txt-xs: 0.75rem;
+  --txt-sm: 0.8125rem;
+  --txt-md: 0.9375rem;
+  --txt-lg: 1.125rem;
+  --txt-xl: 1.5rem;
+  --txt-2xl: 2rem;
+
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-fuerte: 600;
+
+  /* --- Espaciado --------------------------------------------------------- */
+  --esp-1: 0.25rem;
+  --esp-2: 0.5rem;
+  --esp-3: 0.75rem;
+  --esp-4: 1rem;
+  --esp-5: 1.5rem;
+  --esp-6: 2rem;
+  --esp-7: 3rem;
+  --esp-8: 4rem;
+
+  /* --- Radios y sombras -------------------------------------------------- */
+  --radio-sm: 4px;
+  --radio-md: 8px;
+  --radio-lg: 14px;
+  --sombra-1: 0 1px 2px rgb(15 34 30 / 6%);
+  --sombra-2: 0 6px 20px rgb(15 34 30 / 10%);
+  --sombra-3: 0 18px 48px rgb(15 34 30 / 22%);
+
+  /* --- Anchos (frontend-ui.md §3.1) -------------------------------------- */
+  --ancho-max: 1440px;
+  --ancho-max-datos: 1760px;
+  --ancho-min-campo: 11rem;
+  --ancho-sidebar: 15rem;
+
+  /* --- Paleta clara -------------------------------------------------------
+   * Paleta M3 calculada por Stitch a partir de la semilla de marca #0f766e
+   * (mcp__stitch, proyecto 2538550638785823192). El hex original de marca
+   * pasa al rol "primary-container" en M3; "primary" es un tono mas oscuro
+   * que garantiza contraste AA sobre blanco. Ver DESIGN.md para el mapeo
+   * completo de roles M3 -> tokens de esta app.
+   */
+  --lienzo: #f7faf8;
+  --paper: #ffffff;
+  --paper-raised: #ffffff;
+  --paper-sutil: #f1f4f3;
+
+  --ink: #181c1c;
+  --ink-soft: #3e4947;
+  --ink-tenue: #6e7977;
+
+  --line: #bdc9c6;
+  --line-soft: #e6e9e7;
+
+  --marca: #005c55;
+  --marca-fuerte: #00504a;
+  --marca-suave: #d7e6df;
+  --marca-contraste: #ffffff;
+
+  --ok: #1a7f4b;
+  --ok-suave: #daf2e5;
+  --warn: #9a6206;
+  --warn-suave: #fbeed5;
+  --bad: #ba1a1a;
+  --bad-suave: #ffdad6;
+  --info: #005199;
+  --info-suave: #e1eaff;
+  --neutro: #53615c;
+  --neutro-suave: #ebefed;
+
+  --anillo: 0 0 0 3px rgb(0 92 85 / 35%);
+
+  color-scheme: light;
+}
+
+/* Modo oscuro por preferencia del sistema, salvo que el usuario haya elegido. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --lienzo: #101614;
+    --paper: #161e1c;
+    --paper-raised: #1b2523;
+    --paper-sutil: #202b28;
+
+    --ink: #e8efec;
+    --ink-soft: #a7b4af;
+    --ink-tenue: #7f8c87;
+
+    --line: #34433f;
+    --line-soft: #263230;
+
+    --marca: #80d5cb;
+    --marca-fuerte: #9cf2e8;
+    --marca-suave: #14322f;
+    --marca-contraste: #00201d;
+
+    --ok: #5fd08d;
+    --ok-suave: #12301f;
+    --warn: #e2b45c;
+    --warn-suave: #33270f;
+    --bad: #f28b82;
+    --bad-suave: #3a1a18;
+    --info: #7fb2ef;
+    --info-suave: #14243a;
+    --neutro: #9aa8a3;
+    --neutro-suave: #232e2b;
+
+    --anillo: 0 0 0 3px rgb(128 213 203 / 35%);
+    --sombra-1: 0 1px 2px rgb(0 0 0 / 30%);
+    --sombra-2: 0 6px 20px rgb(0 0 0 / 40%);
+    --sombra-3: 0 18px 48px rgb(0 0 0 / 55%);
+
+    color-scheme: dark;
+  }
+}
+
+/* Eleccion explicita del usuario: gana sobre la del sistema, en los dos sentidos. */
+:root[data-theme="dark"] {
+  --lienzo: #101614;
+  --paper: #161e1c;
+  --paper-raised: #1b2523;
+  --paper-sutil: #202b28;
+
+  --ink: #e8efec;
+  --ink-soft: #a7b4af;
+  --ink-tenue: #7f8c87;
+
+  --line: #34433f;
+  --line-soft: #263230;
+
+  --marca: #4ecdc0;
+  --marca-fuerte: #7fdcd2;
+  --marca-suave: #14322f;
+  --marca-contraste: #08211f;
+
+  --ok: #5fd08d;
+  --ok-suave: #12301f;
+  --warn: #e2b45c;
+  --warn-suave: #33270f;
+  --bad: #f28b82;
+  --bad-suave: #3a1a18;
+  --info: #7fb2ef;
+  --info-suave: #14243a;
+  --neutro: #9aa8a3;
+  --neutro-suave: #232e2b;
+
+  --anillo: 0 0 0 3px rgb(78 205 192 / 35%);
+  --sombra-1: 0 1px 2px rgb(0 0 0 / 30%);
+  --sombra-2: 0 6px 20px rgb(0 0 0 / 40%);
+  --sombra-3: 0 18px 48px rgb(0 0 0 / 55%);
+
+  color-scheme: dark;
+}

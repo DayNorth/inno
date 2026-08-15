@@ -1,0 +1,68 @@
+/*
+ * Tailwind CSS v4 — entrada del compilador.
+ *
+ * `tokens.css` sigue siendo la unica fuente de verdad de la paleta: cada
+ * `--color-*` de aqui es un passthrough a una custom property de tokens.css
+ * (`var(--marca)`, `var(--ink)`, ...), asi que el modo oscuro (prefers-color-
+ * scheme y data-theme) lo sigue resolviendo tokens.css exactamente igual que
+ * antes. Tailwind no define ni un solo color literal.
+ *
+ * Espaciado y pesos de fuente NO se redefinen: la escala numerica nativa de
+ * Tailwind ya coincide en los multiplos que usa la app (esp-1..esp-8 =
+ * 0.25rem..4rem = p-1, p-2, p-3, p-4, p-6, p-8, p-12, p-16) y font-normal/
+ * medium/semibold ya son 400/500/600. Reinventar esos nombres solo anadiria
+ * una segunda escala paralela sin ganar nada.
+ */
+@import "tailwindcss";
+
+@theme {
+  --color-lienzo: var(--lienzo);
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-sutil: var(--paper-sutil);
+
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-tenue: var(--ink-tenue);
+
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+
+  --color-marca: var(--marca);
+  --color-marca-fuerte: var(--marca-fuerte);
+  --color-marca-suave: var(--marca-suave);
+  --color-marca-contraste: var(--marca-contraste);
+
+  --color-ok: var(--ok);
+  --color-ok-suave: var(--ok-suave);
+  --color-warn: var(--warn);
+  --color-warn-suave: var(--warn-suave);
+  --color-bad: var(--bad);
+  --color-bad-suave: var(--bad-suave);
+  --color-info: var(--info);
+  --color-info-suave: var(--info-suave);
+  --color-neutro: var(--neutro);
+  --color-neutro-suave: var(--neutro-suave);
+
+  --font-titulos: var(--fuente-titulos);
+  --font-texto: var(--fuente-texto);
+  --font-mono: var(--fuente-mono);
+
+  /* Nombres propios: Tailwind no trae un "md" en 15px por defecto. */
+  --text-xs: var(--txt-xs);
+  --text-sm: var(--txt-sm);
+  --text-md: var(--txt-md);
+  --text-lg: var(--txt-lg);
+  --text-xl: var(--txt-xl);
+  --text-2xl: var(--txt-2xl);
+
+  /* Sobrescribe la escala por defecto: rounded-sm/md/lg pasan a ser
+     exactamente 4px/8px/14px, no los valores de Tailwind. */
+  --radius-sm: var(--radio-sm);
+  --radius-md: var(--radio-md);
+  --radius-lg: var(--radio-lg);
+
+  --shadow-1: var(--sombra-1);
+  --shadow-2: var(--sombra-2);
+  --shadow-3: var(--sombra-3);
+}

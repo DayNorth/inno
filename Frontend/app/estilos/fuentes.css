@@ -1,0 +1,33 @@
+/*
+ * Fuentes SELF-HOSTED. Nunca Google Fonts ni ningun CDN: la CSP prohibe todo
+ * host externo (`font-src 'self'`) y una peticion a un tercero filtraria que
+ * usuario carga que pagina y cuando (frontend-seguridad.md §3.3).
+ *
+ * Los .woff2 van en `public/fuentes/`. Mientras no esten, la aplicacion cae a
+ * las fuentes del sistema declaradas en `tokens.css` y todo sigue funcionando:
+ * `font-display: swap` y la cadena de respaldo lo garantizan.
+ */
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fuentes/ibm-plex-sans-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fuentes/ibm-plex-sans-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fuentes/fraunces-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}

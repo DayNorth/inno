@@ -1,0 +1,85 @@
+@reference "../../../estilos/tailwind.css";
+
+/*
+ * Reglas que comparten los 6 componentes de campo (CampoTexto, CampoNumero,
+ * CampoSelect, CampoComboBox, CampoAreaTexto, CampoCheckbox) via los
+ * selectores descendentes `.campo-vp` / `.campo-checkbox`, igual que antes
+ * vivian una sola vez en Campo.module.css en vez de repetirse en cada
+ * componente.
+ */
+@layer components {
+  .rejilla-campos {
+    /* `minmax(--ancho-min-campo, 1fr)` fija un SUELO DURO (frontend-ui.md
+       §4.1): cuando no caben N columnas, auto-fit reduce columnas en vez de
+       encoger una por debajo de lo legible. */
+    @apply grid items-start gap-x-4 gap-y-6;
+    grid-template-columns: repeat(auto-fit, minmax(var(--ancho-min-campo), 1fr));
+  }
+
+  /* Campos que siempre ocupan la fila entera (textarea, descripciones largas). */
+  .campo-ancho-completo {
+    grid-column: 1 / -1;
+  }
+
+  .campo-vp {
+    @apply flex min-w-0 flex-col gap-1;
+  }
+
+  .campo-vp > label {
+    /* El "*" no puede separarse de la palabra ni envolver por su cuenta. */
+    @apply overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold text-ink-soft;
+  }
+
+  /* El asterisco es decorativo: la obligatoriedad se comunica con
+     required + aria-required en el control, no con el glifo. */
+  .campo-vp[data-obligatorio="true"] > label::after {
+    content: " *";
+    @apply text-bad;
+  }
+
+  .campo-vp :is(input, select, textarea) {
+    /* min-width:0 va en el CONTROL, no en el contenedor: impide que un
+       <select> con opciones largas imponga su ancho intrinseco y desborde
+       la columna. */
+    @apply box-border w-full min-w-0 rounded-md border border-line bg-paper p-3 text-md text-ink;
+    font: inherit;
+  }
+
+  .campo-vp :is(input, select, textarea)[aria-invalid="true"] {
+    @apply border-bad;
+  }
+
+  .campo-vp :is(input, select, textarea):disabled {
+    @apply bg-paper-sutil text-ink-tenue;
+  }
+
+  .campo-vp input[type="number"] {
+    @apply text-right [font-variant-numeric:tabular-nums];
+  }
+
+  .campo-vp textarea {
+    @apply min-h-[4.5rem] resize-y;
+  }
+
+  .campo-vp .error-campo {
+    @apply text-xs text-bad;
+  }
+
+  .campo-vp .ayuda-campo {
+    @apply text-xs text-ink-tenue;
+  }
+
+  /* --- Checkbox: la etiqueta va al lado del control, no encima --- */
+  .campo-checkbox {
+    @apply flex min-h-11 items-center gap-3 rounded-md border border-line-soft bg-paper px-3 py-2;
+  }
+
+  .campo-checkbox input[type="checkbox"] {
+    @apply h-[1.1rem] w-[1.1rem] flex-none;
+    accent-color: var(--color-marca);
+  }
+
+  .campo-checkbox label {
+    @apply whitespace-normal text-sm font-medium text-ink;
+  }
+}

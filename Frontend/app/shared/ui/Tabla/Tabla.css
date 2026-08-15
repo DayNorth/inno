@@ -1,0 +1,37 @@
+/* Da acceso al @theme de tailwind.css (tokens `--color-*`) sin volver a
+   importar el motor de Tailwind entero: https://tailwindcss.com/docs/functions-and-directives#reference-directive */
+@reference "../../../estilos/tailwind.css";
+
+/*
+ * Estilos que las 8 tablas de features comparten via el selector `.tabla-vp`
+ * (cabecera pegajosa, hover de fila, borde de celda). Ir por @apply en vez de
+ * repetir esta decena de clases en cada *Tabla.tsx es la misma razon por la
+ * que el CSS Module original ponia estas reglas una sola vez con un selector
+ * descendente (`.tabla :is(th, td)`): son genericas a CUALQUIER columna, y
+ * las columnas las define cada feature con el objeto `t` de Tabla.tsx.
+ */
+@layer components {
+  .tabla-vp :is(th, td) {
+    @apply border-b border-line-soft px-4 py-3 text-left align-top [overflow-wrap:anywhere];
+  }
+
+  .tabla-vp thead th {
+    @apply sticky top-0 z-[1] whitespace-nowrap bg-paper-sutil text-xs font-semibold text-ink-soft uppercase [letter-spacing:0.04em];
+  }
+
+  .tabla-vp tbody tr:last-child :is(th, td) {
+    @apply border-b-0;
+  }
+
+  .tabla-vp tbody tr:hover {
+    @apply bg-paper-sutil;
+  }
+
+  /* Bitacora: miles de filas sin paginacion en el contrato (contrato-api.md
+     §10.4). `content-visibility` evita pagar el layout de todos los nodos a
+     la vez. */
+  .tabla-vp--filas-diferidas tbody tr {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 2.75rem;
+  }
+}

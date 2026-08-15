@@ -1,0 +1,70 @@
+/*
+ * `@layer base`: sin esto, estas reglas quedan CSS "sin capa", y en cascade
+ * layers el CSS sin capa le gana a CUALQUIER capa (incluida `utilities` de
+ * Tailwind) sin importar especificidad. Con la misma capa `base` que usa el
+ * preflight de Tailwind, las utilidades (`@layer utilities`) vuelven a ganar
+ * como corresponde. https://tailwindcss.com/docs/adding-custom-styles
+ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  * {
+    margin: 0;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img,
+  picture,
+  svg,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    overflow-wrap: break-word;
+  }
+
+  ul[class],
+  ol[class] {
+    list-style: none;
+    padding: 0;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+}

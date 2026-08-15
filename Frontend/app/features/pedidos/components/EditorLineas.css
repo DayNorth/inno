@@ -1,0 +1,61 @@
+@reference "../../../estilos/tailwind.css";
+
+/*
+ * Columnas declaradas explicitamente porque los campos tienen tamanos
+ * naturales muy distintos. Cada `minmax()` fija un suelo: la fila NO puede
+ * colapsar ninguna columna por debajo de lo legible (frontend-ui.md §4.2).
+ *
+ * El selector estructural `.editor-linea > div` (no una clase en cada campo)
+ * es deliberado: los campos los renderiza CampoSelect/CampoNumero, que ya
+ * traen su propio `.campo-vp` (flex en columna). Aqui, DENTRO del editor de
+ * lineas, esos mismos campos pasan a ser celdas de una subgrid — sin tocar
+ * CampoSelect/CampoNumero ni duplicar su logica.
+ */
+@layer components {
+  .editor-linea {
+    @apply items-end gap-3 rounded-md border border-line-soft p-3;
+    display: grid;
+    grid-template-columns:
+      minmax(10rem, 2fr) /* Planta */
+      minmax(4.5rem, 6rem) /* Cantidad */
+      minmax(6rem, 8rem) /* Precio */
+      minmax(5rem, auto) /* Subtotal (solo lectura) */
+      auto; /* Quitar */
+    grid-template-rows: auto auto auto; /* etiqueta · control · error */
+  }
+
+  /* Cada campo comparte las bandas de la rejilla padre: todas las etiquetas en
+     una banda, todos los controles en otra, todos los errores en la tercera.
+     Una etiqueta que envuelve empuja la banda entera, no desalinea solo su
+     campo. */
+  .editor-linea > div {
+    @apply row-span-3 grid min-w-0 gap-1;
+    grid-template-rows: subgrid;
+  }
+
+  @supports not (grid-template-rows: subgrid) {
+    .editor-linea > div {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  /* El panel es estrecho (modal angosto o movil): 2 columnas y el resto
+     envuelve. El @container lo pone Modal.tsx en el dialogo. */
+  @container (max-width: 34rem) {
+    .editor-linea {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: none;
+    }
+
+    .editor-linea > div {
+      grid-row: auto;
+      grid-template-rows: none;
+    }
+
+    .editor-linea > .editor-linea-quitar {
+      grid-column: 1 / -1;
+      justify-self: end;
+    }
+  }
+}
