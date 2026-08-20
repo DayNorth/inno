@@ -5,6 +5,9 @@ const { sql } = require("../db");
 const { request } = require("../utils/ejecutor");
 
 // Selects de responsables/duenos (usuarios activos) para los <select> del SPA.
+// Incluye intentos_fallidos/mfa_activado/ultimo_acceso para la pantalla de
+// administracion de usuarios (desbloqueo manual); el resto de selects del SPA
+// simplemente ignora esos campos.
 async function listarActivos(pool) {
     const resultado = await pool.request().query(`
         SELECT
@@ -12,7 +15,11 @@ async function listarActivos(pool) {
             u.nombre,
             u.correo,
             r.nombre AS rol,
-            u.estado
+            u.id_rol,
+            u.estado,
+            u.mfa_activado,
+            u.intentos_fallidos,
+            u.ultimo_acceso
         FROM Usuarios u
         INNER JOIN Roles r
             ON u.id_rol = r.id_rol
@@ -38,11 +45,47 @@ async function buscarPorCorreoParaLogin(ejecutor, correo) {
                 u.password,
                 u.id_rol,
                 u.estado,
+                u.mfa_activado,
+                u.intentos_fallidos,
                 r.nombre AS rol
             FROM Usuarios u
             INNER JOIN Roles r
                 ON u.id_rol = r.id_rol
             WHERE u.correo = @correo
+        `);
+    return resultado.recordset[0] || null;
+}
+
+// Incrementa el contador de intentos fallidos (password incorrecta). Fuera de
+// transacción: es una señal de seguridad que debe quedar registrada aunque el
+// login termine en 401 (no hay nada más que revertir en ese camino).
+async function incrementarIntentosFallidos(ejecutor, idUsuario) {
+    await request(ejecutor).input("id_usuario", sql.Int, idUsuario).query(`
+            UPDATE Usuarios
+            SET intentos_fallidos = intentos_fallidos + 1
+            WHERE id_usuario = @id_usuario
+        `);
+}
+
+// Login exitoso: resetea el contador de intentos fallidos y marca el acceso.
+// Se llama dentro de la misma transacción del login (junto con Bitacora).
+async function registrarLoginExitoso(ejecutor, idUsuario) {
+    await request(ejecutor).input("id_usuario", sql.Int, idUsuario).query(`
+            UPDATE Usuarios
+            SET intentos_fallidos = 0, ultimo_acceso = SYSUTCDATETIME()
+            WHERE id_usuario = @id_usuario
+        `);
+}
+
+// Desbloqueo manual (Administrador): resetea el contador sin necesidad de un
+// login exitoso. Devuelve la fila actualizada o null si el usuario no existe.
+async function resetearIntentosFallidos(ejecutor, idUsuario) {
+    const resultado = await request(ejecutor)
+        .input("id_usuario", sql.Int, idUsuario).query(`
+            UPDATE Usuarios
+            SET intentos_fallidos = 0
+            OUTPUT INSERTED.id_usuario, INSERTED.nombre, INSERTED.intentos_fallidos
+            WHERE id_usuario = @id_usuario
         `);
     return resultado.recordset[0] || null;
 }
@@ -76,5 +119,8 @@ async function buscarPorIdParaToken(ejecutor, idUsuario) {
 module.exports = {
     listarActivos,
     buscarPorCorreoParaLogin,
-    buscarPorIdParaToken
+    buscarPorIdParaToken,
+    incrementarIntentosFallidos,
+    registrarLoginExitoso,
+    resetearIntentosFallidos
 };

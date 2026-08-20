@@ -6,4 +6,16 @@ async function listarActivos(req, res) {
     res.status(200).json(usuarios);
 }
 
-module.exports = { listarActivos };
+async function desbloquear(req, res) {
+    const idUsuarioAdmin = req.usuario.id_usuario;
+    const usuario = await usuariosService.desbloquear(
+        idUsuarioAdmin,
+        req.params.id
+    );
+    res.status(200).json({
+        mensaje: "Usuario desbloqueado correctamente",
+        usuario
+    });
+}
+
+module.exports = { listarActivos, desbloquear };

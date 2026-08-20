@@ -186,3 +186,33 @@ export const IconoBuscar = (props: Props) =>
     </>,
     props,
   );
+
+export const IconoProductos = (props: Props) =>
+  base(
+    <>
+      <path d="M12 3.5 20 8v8l-8 4.5L4 16V8l8-4.5Z" />
+      <path d="M4 8l8 4.5L20 8" />
+      <path d="M12 12.5V21" />
+    </>,
+    props,
+  );
+
+export const IconoPermisos = (props: Props) =>
+  base(
+    <>
+      <path d="M12 3.5 19 6.5v5c0 5-3 8-7 9-4-1-7-4-7-9v-5l7-3Z" />
+      <path d="M9.5 12l1.8 1.8L14.5 10" />
+    </>,
+    props,
+  );
+
+export const IconoUsuarios = (props: Props) =>
+  base(
+    <>
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M3.5 20c0-3.3 2.5-6 5.5-6s5.5 2.7 5.5 6" />
+      <circle cx="17.5" cy="7.5" r="2.2" />
+      <path d="M16 14.3c2.4.4 4 2.6 4 5.7" />
+    </>,
+    props,
+  );

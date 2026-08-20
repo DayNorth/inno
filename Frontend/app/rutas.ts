@@ -9,6 +9,7 @@ export const RUTAS = {
   login: "/login",
   inicio: "/",
   clientes: "/clientes",
+  productos: "/productos",
   pedidos: "/pedidos",
   proveedores: "/proveedores",
   accesos: "/accesos",
@@ -17,6 +18,8 @@ export const RUTAS = {
   incidentes: "/incidentes",
   bitacora: "/bitacora",
   documentos: "/documentos",
+  usuarios: "/usuarios",
+  permisos: "/permisos",
 } as const;
 
 export type Ruta = (typeof RUTAS)[keyof typeof RUTAS];

@@ -5,7 +5,7 @@ import { useSesion } from "@/shared/auth/sesion";
 import { cerrarSesion, cerrarSesionLocalmente } from "@/shared/auth/cerrarSesion";
 import { alCerrarEnOtraPestana, type MotivoCierre } from "@/shared/auth/canalSesion";
 import { vigilarSesion } from "@/shared/auth/inactividad";
-import { ROLES_BITACORA, type IdRol } from "@/shared/tipos/rol";
+import { ROLES_ADMIN, ROLES_BITACORA, type IdRol } from "@/shared/tipos/rol";
 import { Boton } from "@/shared/ui/Boton/Boton";
 import { Cargando } from "@/shared/ui/Cargando/Cargando";
 import {
@@ -18,8 +18,11 @@ import {
   IconoInicio,
   IconoLogout,
   IconoPedidos,
+  IconoPermisos,
+  IconoProductos,
   IconoProveedores,
   IconoRiesgos,
+  IconoUsuarios,
 } from "@/shared/ui/Icono/Iconos";
 import { iniciales } from "@/shared/utils/iniciales";
 import { AlternarTema } from "./AlternarTema";
@@ -37,6 +40,7 @@ interface ItemNav {
 const NAVEGACION: readonly ItemNav[] = [
   { a: RUTAS.inicio, etiqueta: "Inicio", Icono: IconoInicio },
   { a: RUTAS.clientes, etiqueta: "Clientes", Icono: IconoClientes },
+  { a: RUTAS.productos, etiqueta: "Productos", Icono: IconoProductos },
   { a: RUTAS.pedidos, etiqueta: "Pedidos", Icono: IconoPedidos },
   { a: RUTAS.proveedores, etiqueta: "Proveedores", Icono: IconoProveedores },
   { a: RUTAS.accesos, etiqueta: "Accesos", Icono: IconoAccesos },
@@ -45,6 +49,8 @@ const NAVEGACION: readonly ItemNav[] = [
   { a: RUTAS.incidentes, etiqueta: "Incidentes", Icono: IconoIncidentes },
   { a: RUTAS.bitacora, etiqueta: "Bitacora", Icono: IconoBitacora, roles: ROLES_BITACORA },
   { a: RUTAS.documentos, etiqueta: "Documentos", Icono: IconoDocumentos },
+  { a: RUTAS.usuarios, etiqueta: "Usuarios", Icono: IconoUsuarios, roles: ROLES_ADMIN },
+  { a: RUTAS.permisos, etiqueta: "Permisos", Icono: IconoPermisos, roles: ROLES_ADMIN },
 ];
 
 /**
@@ -53,6 +59,7 @@ const NAVEGACION: readonly ItemNav[] = [
  */
 const RUTAS_DE_DATOS: readonly string[] = [
   RUTAS.clientes,
+  RUTAS.productos,
   RUTAS.pedidos,
   RUTAS.proveedores,
   RUTAS.accesos,
@@ -60,6 +67,8 @@ const RUTAS_DE_DATOS: readonly string[] = [
   RUTAS.riesgos,
   RUTAS.incidentes,
   RUTAS.bitacora,
+  RUTAS.usuarios,
+  RUTAS.permisos,
 ];
 
 export function AppShell() {

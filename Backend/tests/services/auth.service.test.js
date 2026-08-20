@@ -74,7 +74,9 @@ beforeEach(() => {
             password: HASH_SECRETA,
             id_rol: 1,
             estado: "Activo",
-            rol: "Administrador"
+            rol: "Administrador",
+            mfa_activado: false,
+            intentos_fallidos: 0
         }),
         buscarPorIdParaToken: async () => ({
             id_usuario: 7,
@@ -83,6 +85,13 @@ beforeEach(() => {
             id_rol: 1,
             estado: "Activo",
             rol: "Administrador"
+        }),
+        incrementarIntentosFallidos: async () => {},
+        registrarLoginExitoso: async () => {},
+        resetearIntentosFallidos: async () => ({
+            id_usuario: 7,
+            nombre: "Admin",
+            intentos_fallidos: 0
         })
     };
 
