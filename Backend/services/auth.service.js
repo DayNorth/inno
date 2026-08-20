@@ -28,6 +28,12 @@ const bitacoraRepo = require("../repositories/bitacora.repository");
 // no-existe / revocado / expirado / carrera para no filtrar el estado interno.
 const MENSAJE_SESION_EXPIRADA = "Sesion expirada";
 
+// Umbral de intentos fallidos consecutivos antes de bloquear la cuenta
+// (deteccion de comportamiento anomalo, mejora del modelo ER). Se resetea en
+// cada login exitoso; para desbloquear manualmente ver
+// PATCH /api/usuarios/:id/desbloquear (rol Administrador).
+const LIMITE_INTENTOS_FALLIDOS = 5;
+
 // Firma el access token con el payload del legacy (identidad + rol) y el TTL
 // corto configurado (JWT_ACCESS_TTL, 15m). Firmado con JWT_SECRET (access).
 // Invariante: jwt.sign OMITE las claims undefined sin avisar, y un token sin
@@ -64,7 +70,8 @@ function usuarioPublico(usuario) {
         nombre: usuario.nombre,
         correo: usuario.correo,
         id_rol: usuario.id_rol,
-        rol: usuario.rol
+        rol: usuario.rol,
+        mfa_activado: Boolean(usuario.mfa_activado)
     };
 }
 
@@ -88,9 +95,26 @@ async function login(datos) {
         throw new ErrorProhibido("El usuario está inactivo");
     }
 
+    // Cuenta bloqueada por intentos fallidos consecutivos: se rechaza ANTES
+    // de comparar la contraseña (aunque la contraseña sea correcta), para que
+    // un ataque de fuerza bruta que eventualmente acierte no consiga entrar
+    // sin que un administrador desbloquee la cuenta primero.
+    if (usuario.intentos_fallidos >= LIMITE_INTENTOS_FALLIDOS) {
+        throw new ErrorProhibido(
+            "La cuenta está bloqueada por múltiples intentos fallidos. Contacte a un administrador."
+        );
+    }
+
     const passwordValida = await bcrypt.compare(password, usuario.password);
 
     if (!passwordValida) {
+        // Se registra el intento fuera de la transacción de login: es una
+        // señal de seguridad que debe persistir aunque el resto del login no
+        // continúe (no hay nada que revertir en el camino del 401).
+        await usuariosRepo.incrementarIntentosFallidos(
+            pool,
+            usuario.id_usuario
+        );
         throw new ErrorNoAutorizado("Correo o contraseña incorrectos");
     }
 
@@ -106,6 +130,11 @@ async function login(datos) {
             idUsuario: usuario.id_usuario,
             fechaExpiracion
         });
+
+        await usuariosRepo.registrarLoginExitoso(
+            transaction,
+            usuario.id_usuario
+        );
 
         await bitacoraRepo.registrar(
             transaction,

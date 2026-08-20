@@ -44,6 +44,7 @@ const proveedoresRoutes = require("./routes/proveedores");
 const usuariosRoutes = require("./routes/usuarios");
 const plataformasRoutes = require("./routes/plataformas");
 const documentosRoutes = require("./routes/documentos");
+const permisosRoutes = require("./routes/permisos");
 
 const app = express();
 
@@ -109,7 +110,7 @@ app.use("/api/proveedores", verificarToken, proveedoresRoutes);
 app.use("/api/usuarios", verificarToken, usuariosRoutes);
 app.use("/api/plataformas", verificarToken, plataformasRoutes);
 app.use("/api/documentos", verificarToken, documentosRoutes);
-
+app.use("/api/permisos", verificarToken, permisosRoutes);
 app.get("/", (req, res) => {
     res.status(200).json({
         mensaje: "API de Vinkaplant funcionando"

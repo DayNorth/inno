@@ -30,3 +30,6 @@ export const ROLES_BITACORA: readonly IdRol[] = [
 
 /** Excepcion 2: revocar un acceso es exclusivo de Administrador. */
 export const ROLES_REVOCAR_ACCESO: readonly IdRol[] = [ROLES.administrador];
+
+/** Excepcion 3: administrar permisos y desbloquear usuarios es exclusivo de Administrador. */
+export const ROLES_ADMIN: readonly IdRol[] = [ROLES.administrador];

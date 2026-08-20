@@ -23,6 +23,7 @@ export type IdEvaluacion = Marcado<"Evaluacion">;
 export type IdPlan = Marcado<"Plan">;
 export type IdBitacora = Marcado<"Bitacora">;
 export type IdDetallePedido = Marcado<"DetallePedido">;
+export type IdPermiso = Marcado<"Permiso">;
 
 const marcar = <M extends string>(n: number): Marcado<M> => n as Marcado<M>;
 
@@ -41,6 +42,7 @@ export const idPlan = (n: number): IdPlan => marcar<"Plan">(n);
 export const idBitacora = (n: number): IdBitacora => marcar<"Bitacora">(n);
 export const idDetallePedido = (n: number): IdDetallePedido =>
   marcar<"DetallePedido">(n);
+export const idPermiso = (n: number): IdPermiso => marcar<"Permiso">(n);
 
 /** Tope de `int` en SQL Server. El backend rechaza cualquier `:id` mayor. */
 const MAX_INT = 2147483647;

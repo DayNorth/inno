@@ -4,8 +4,8 @@ Sistema de gestión documental / pedidos de VinkaPlant. Monorepo con:
 
 - **Backend/** — API REST (Node.js + Express 5 + SQL Server)
 - **Frontend/** — SPA (React 19 + Vite)
-- **VINKAPLANT_DB_v2.sql** / **VINKAPLANT_DB_v3.sql** — scripts de base de
-  datos (SQL Server).
+- **VINKAPLANT_DB_v2.sql** / **VINKAPLANT_DB_v3.sql** / **VINKAPLANT_DB_v4.sql** — scripts de
+  base de datos (SQL Server).
 
 ## Requisitos previos
 
@@ -56,9 +56,10 @@ docker compose ps
 
 ## 2. Aplicar los scripts de base de datos
 
-Los tres `.sql` de la raíz **no se aplican todos**: `VINKAPLANT_DB.sql` es la
-versión original (sin el módulo VinkaGuard) y quedó **obsoleta**, superada por
-`VINKAPLANT_DB_v2.sql`. Sobre un contenedor nuevo se aplican, en este orden:
+Los scripts `.sql` de la raíz **no se aplican todos**: `VINKAPLANT_DB.sql` es
+la versión original (sin el módulo VinkaGuard) y quedó **obsoleta**, superada
+por `VINKAPLANT_DB_v2.sql`. Sobre un contenedor nuevo se aplican, **en este
+orden**:
 
 1. **`VINKAPLANT_DB_v2.sql`** — script full-create (crea la base, el esquema
    completo y datos semilla). Es **destructivo**: si se vuelve a ejecutar
@@ -67,6 +68,13 @@ versión original (sin el módulo VinkaGuard) y quedó **obsoleta**, superada po
 2. **`VINKAPLANT_DB_v3.sql`** — parche aditivo (agrega la tabla
    `RefreshTokens` para el login access/refresh). Es idempotente: se puede
    volver a ejecutar sin riesgo.
+3. **`VINKAPLANT_DB_v4.sql`** — parche aditivo (agrega las tablas `Permisos`
+   y `RolPermiso`; las columnas `mfa_activado`, `intentos_fallidos` y
+   `ultimo_acceso` en `Usuarios`; y `cantidad_disponible`,
+   `estado_fitosanitario` y `ubicacion_invernadero` en `Productos`). También
+   es idempotente. Su reversión manual vive aparte, en
+   `VINKAPLANT_DB_v4_rollback.sql` (no se ejecuta con nada; es solo para
+   cuando de verdad se quiera deshacer v4).
 
 Copiar los scripts dentro del contenedor y ejecutarlos con el `sqlcmd` que
 trae la imagen:
@@ -74,24 +82,40 @@ trae la imagen:
 ```bash
 docker cp VINKAPLANT_DB_v2.sql vinkaplant-sql:/tmp/v2.sql
 docker cp VINKAPLANT_DB_v3.sql vinkaplant-sql:/tmp/v3.sql
+docker cp VINKAPLANT_DB_v4.sql vinkaplant-sql:/tmp/v4.sql
 
 docker exec -it vinkaplant-sql /opt/mssql-tools18/bin/sqlcmd \
   -S localhost -U sa -P "$DB_SA_PASSWORD" -C -i /tmp/v2.sql
 
 docker exec -it vinkaplant-sql /opt/mssql-tools18/bin/sqlcmd \
   -S localhost -U sa -P "$DB_SA_PASSWORD" -C -i /tmp/v3.sql
+
+docker exec -it vinkaplant-sql /opt/mssql-tools18/bin/sqlcmd \
+  -S localhost -U sa -P "$DB_SA_PASSWORD" -C -i /tmp/v4.sql
 ```
 
 (En PowerShell, reemplazar `$DB_SA_PASSWORD` por el valor real o por
-`$env:DB_SA_PASSWORD` si lo cargaste como variable de sesión.)
+`$env:DB_SA_PASSWORD` si lo cargaste como variable de sesión. Escribir cada
+comando en **una sola línea**: la continuación de línea con `\` es sintaxis
+de bash, no de PowerShell.)
+
+> **Nota Windows/PowerShell:** si vas a editar o volver a guardar alguno de
+> estos `.sql` en Windows, guárdalo siempre en **UTF-8 sin BOM** y evitá
+> herramientas que "autocorrijan" el texto (algunos editores convierten
+> secuencias de guiones en otros caracteres). Antes de copiarlo al
+> contenedor, podés verificar que no se coló ningún carácter raro con:
+> `Select-String -Path .\VINKAPLANT_DB_v4.sql -Pattern '[^\x00-\x7F]'`
+> (no debe devolver ningún resultado).
 
 Verificación rápida:
 
 ```bash
 docker exec -it vinkaplant-sql /opt/mssql-tools18/bin/sqlcmd \
   -S localhost -U sa -P "$DB_SA_PASSWORD" -C \
-  -Q "SELECT name FROM sys.databases WHERE name = 'VINKAPLANT_DB'; USE VINKAPLANT_DB; SELECT COUNT(*) AS usuarios FROM dbo.Usuarios;"
+  -Q "SELECT name FROM sys.databases WHERE name = 'VINKAPLANT_DB'; USE VINKAPLANT_DB; SELECT COUNT(*) AS usuarios FROM dbo.Usuarios; SELECT COUNT(*) AS permisos FROM dbo.Permisos;"
 ```
+
+`permisos` debe dar `13`.
 
 ## 3. Backend
 
@@ -157,25 +181,42 @@ correo:     admin@vinkaplant.com
 contraseña: admin12345*
 ```
 
-> El login tiene rate limiting (10 intentos / 15 min por IP fijo en backend).
-> Si te bloqueás probando credenciales, esperá la ventana o reiniciá el
-> backend en desarrollo.
+El login tiene dos capas de límite:
+
+- **Por IP**: rate limiting general (10 intentos / 15 min por IP, fijo en
+  backend). Si te bloqueás probando credenciales, esperá la ventana o
+  reiniciá el backend en desarrollo.
+- **Por cuenta**: tras **5 intentos fallidos consecutivos** con la misma
+  cuenta, esa cuenta se bloquea (`intentos_fallidos` en `Usuarios`) hasta que
+  un Administrador la desbloquea desde la pantalla **Usuarios**, o
+  manualmente en base de datos:
+
+  ```sql
+  UPDATE Usuarios SET intentos_fallidos = 0 WHERE correo = 'admin@vinkaplant.com';
+  ```
 
 ## Verificación end-to-end
 
-1. `docker compose ps` → contenedor `vinkaplant-sql` con estado `healthy`.
-2. Backend: `curl http://localhost:3001/` → `200`.
-3. Frontend: abrir `http://localhost:5173`, iniciar sesión con las
-   credenciales de prueba.
+- `docker compose ps` → contenedor `vinkaplant-sql` con estado `healthy`.
+- Backend: `curl http://localhost:3001/` → `200`.
+- Frontend: abrir `http://localhost:5173`, iniciar sesión con las
+  credenciales de prueba. El menú lateral debe mostrar Productos, Usuarios y
+  Permisos (los dos últimos solo si el usuario es Administrador).
 
 ## Problemas comunes
 
 - **`ECONNREFUSED` al backend contra SQL Server**: el contenedor tarda unos
   segundos en aceptar conexiones tras `docker compose up`; esperar a que el
   healthcheck esté `healthy` antes de arrancar el backend.
-- **Puerto 3000/1433 ocupado**: este proyecto usa 3001 (backend) y 1434
-  (SQL Server en el host) justamente para evitar choques con Grafana u otra
+- **Puerto 3000/1433 ocupado**: este proyecto usa 3001 (backend) y 1434 (SQL
+  Server en el host) justamente para evitar choques con Grafana u otra
   instancia de SQL Server local.
 - **`docker compose up` falla por contraseña débil**: SQL Server rechaza
   contraseñas de `sa` que no cumplan su política de complejidad; usar una
   contraseña larga con mayúsculas, minúsculas, números y símbolos.
+- **`sqlcmd` falla con `Missing end comment mark '*/'` al aplicar un `.sql`**:
+  la versión de `sqlcmd` de `mssql-tools18` (reescrita en Go) separa lotes
+  buscando líneas que digan literalmente `GO`, sin fijarse si están dentro de
+  un comentario `/* */`. Evitar bloques de comentario que contengan una línea
+  `GO` sola; usar comentarios de línea (`--`) para bloques largos de texto en
+  los `.sql` de este proyecto.
